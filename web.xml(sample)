@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="denodo-restfulws" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+    <display-name>Denodo RESTful Web Service</display-name>
+    <description>Denodo RESTful Web Service</description>
+
+
+
+    <filter>
+        <filter-name>SecurityFilter</filter-name>
+        <filter-class>com.denodo.restful.filters.SecurityFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SecurityFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter>
+        <filter-name>PreventUnsecureErrorMessagesFilter</filter-name>
+        <filter-class>com.denodo.restful.filters.PreventUnsecureErrorMessagesFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>PreventUnsecureErrorMessagesFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter>
+        <filter-name>RewriteURIFilter</filter-name>
+        <filter-class>com.denodo.restful.filters.RewriteURIFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RewriteURIFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>Jersey</filter-name>
+        <filter-class>com.sun.jersey.spi.container.servlet.ServletContainer</filter-class>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.WebPageContentRegex</param-name>
+            <param-value>/(resources|images|js|css|(WEB-INF/jsp))/.*</param-value>
+        </init-param>
+
+<!--
+Uncomment the following parameters to enable the Jersey's tracing module.
+
+        <init-param>
+            <param-name>com.sun.jersey.config.feature.Trace</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.feature.TracePerRequest</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value>
+        </init-param>
+ -->
+
+    </filter>
+
+    <filter-mapping>
+        <filter-name>Jersey</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <display-name>Logging Request Listener</display-name>
+        <listener-class>com.denodo.vdb.wsgenerator.common.execution.filter.LoggingRequestListener</listener-class>
+    </listener>
+    <listener>
+        <display-name>Data Source Manager</display-name>
+        <listener-class>com.denodo.vdb.wsgenerator.common.execution.QueryUtilDatasourceManager</listener-class>
+    </listener>
+
+    <error-page>
+        <error-code>400</error-code>
+        <location>/WEB-INF/jsp/error400.jsp</location>
+    </error-page>
+
+    <error-page>
+        <error-code>401</error-code>
+        <location>/WEB-INF/jsp/error401.jsp</location>
+    </error-page>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/jsp/error404.jsp</location>
+    </error-page>
+
+    <error-page>
+        <error-code>405</error-code>
+        <location>/WEB-INF/jsp/error405.jsp</location>
+    </error-page>
+
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/WEB-INF/jsp/generic_error.jsp</location>
+    </error-page>
+
+    <env-entry>
+        <env-entry-name>vdbUri</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value><![CDATA[//denododev.treasury.corp.ge.com:9999/db_mdm]]></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>ServiceMode</env-entry-name>
+        <env-entry-type>java.lang.Boolean</env-entry-type>
+        <env-entry-value>true</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>ServiceModeDatabase</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>db_mdm</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>timezone</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>GMT</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>outputNameSpace</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>http://www.denodo.com/restful</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>xhtml_defaultRowsPerPage</env-entry-name>
+        <env-entry-type>java.lang.Integer</env-entry-type>
+        <env-entry-value>25</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>maximumRowsPerPage</env-entry-name>
+        <env-entry-type>java.lang.Integer</env-entry-type>
+        <env-entry-value>-1</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>username</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value><![CDATA[mdm]]></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>password</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>n4NWV/8IFepSq1wwYuPydPXrXUb0R/vG</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>isPassEncrypted</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>true</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>chunkSize</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>1000</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>chunkTimeout</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>90000</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>queryTimeout</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>90000</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>poolEnabled</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>true</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>poolInitSize</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>0</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>poolMaxActive</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>30</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpAuthType</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>NO_AUTH</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpAuthLogin</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpAuthPassword</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value> </env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpSamlSpEntityId</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpSamlBaseURl</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpLdapServerUri</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpLdapUserPattern</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>httpLdapAcceptedUsers</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value></env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>com.denodo.vdb.proof.environment</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>false</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>webAppName</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>bankacctcoreservice</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>XSLTTransformerFactoryImpl</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>net.sf.saxon.TransformerFactoryImpl</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>applyXSLTToErrors</env-entry-name>
+        <env-entry-type>java.lang.Boolean</env-entry-type>
+        <env-entry-value>false</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>displayVerboseErrorMessages</env-entry-name>
+        <env-entry-type>java.lang.Boolean</env-entry-type>
+        <env-entry-value>true</env-entry-value>
+    </env-entry>
+
+    <!--
+        The first value is the default representation
+    -->
+    <env-entry>
+        <env-entry-name>allowedRepresentations</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>HTML,XML,JSON</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>displayRESTfulReferences</env-entry-name>
+        <env-entry-type>java.lang.Boolean</env-entry-type>
+        <env-entry-value>true</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>representNULLValuesAsEmptyXMLElements</env-entry-name>
+        <env-entry-type>java.lang.Boolean</env-entry-type>
+        <env-entry-value>false</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>noResultsReturnHTTPCode</env-entry-name>
+        <env-entry-type>java.lang.Integer</env-entry-type>
+        <env-entry-value>200</env-entry-value>
+    </env-entry>
+
+</web-app>
