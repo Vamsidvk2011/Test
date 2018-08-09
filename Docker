@@ -1,0 +1,71 @@
+I have installed Docker on an Amazon Linux server and given it permissions with sudo usermod -aG docker $USER . When I start my Jenkins docker containers (which have the home directories on an EBS mounted volume, mounted at /var/lib/docker/volumes ) from the command line;
+
+docker run -d \
+--restart=always \
+--name=jenkins-core \
+--hostname=jenkins-core \
+-p 8080:8080 \
+-p 50000:50000 \
+--env JENKINS_OPTS="--prefix=/core" \
+-v jenkins-core:/var/jenkins_home \
+jenkins/jenkins:lts
+
+Everything works fine. However when I try to start it from docker-compose up -d or sudo docker-compose up -d I get;
+
+touch: cannot touch /var/jenkins_home/copy_reference_file.log: Permission denied
+Can not write to /var/jenkins_home/copy_reference_file.log. Wrong volume permissions?
+
+and the docker containers go into a boot loop trying to restart. I cannot figure out why the permissions are wrong on docker-compose but fine on docker .
+
+I have tried sudo chown $(whoami):$(whoami) /usr/local/bin/docker-compose but it didn’t work. I installed docker-compose from here; https://docs.docker.com/compose/install/
+
+here is the docker-compose.yml there is also a .env file for the variables (not attached)
+
+version: "3.6"
+services:
+  jenkins-core:
+    image:           jenkins/jenkins:lts
+    container_name:  jenkins-core
+    restart:         always
+    ports:
+      - ${JENKINS_CORE_HOST_PORT_8080}:${JENKINS_PORT_8080}
+      - ${JENKINS_CORE_HOST_PORT_50000}:${JENKINS_PORT_50000}
+    environment:
+      - JENKINS_OPTS=--prefix=${JENKINS_CORE_PREFIX}
+      - JAVA_OPTS=-Duser.timezone=${TZ}
+    volumes:
+      - ${JENKINS_CORE_HOME_DIR}:/var/jenkins_home
+  jenkins-integrations:
+    image:           jenkins/jenkins:lts
+    container_name:  jenkins-integrations
+    restart:         always
+    ports:
+      - ${JENKINS_INTEGRATIONS_HOST_PORT_8080}:${JENKINS_PORT_8080}
+      - ${JENKINS_INTEGRATIONS_HOST_PORT_50000}:${JENKINS_PORT_50000}
+    environment:
+      - JENKINS_OPTS=--prefix=${JENKINS_INTEGRATIONS_PREFIX}
+      - JAVA_OPTS=-Duser.timezone=${TZ}
+    volumes:
+      - ${JENKINS_INTEGRATIONS_HOME_DIR}:/var/jenkins_home
+  portainer:
+    image:           portainer/portainer
+    container_name:  portainer
+    restart:         always
+    environment:
+      - TZ=${TZ}
+    ports:
+      - ${PORTAINER_PORT_9000}:9000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKERCONFDIR}/portainer:/data
+    command:         -H unix:///var/run/docker.sock
+  watchtower:
+    image:           v2tec/watchtower
+    container_name:  watchtower
+    restart:         always
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:         --schedule 0 0 4 * * * --cleanup
