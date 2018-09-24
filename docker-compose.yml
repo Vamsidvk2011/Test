@@ -1,0 +1,105 @@
+version: '2'
+
+volumes:
+  postgresdata:
+
+services:
+  mypostgres:
+    image: "postgres:9.6"
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+
+  goaws:
+    container_name: goaws
+    image: pafortin/goaws
+    ports:
+      - 52113:52113
+    volumes:
+     - ./app/conf:/conf
+
+  case:
+    build:
+      context: case
+    environment:
+      - spring_datasource_url=jdbc:postgresql://mypostgres:5432/postgres
+      - spring_datatsource_username=admin
+      - spring_datasource_password=password
+      - ce_api_gateway_url=http://haproxy:3456
+      - PROXY_HOST=sjc1intproxy01.crd.ge.com
+      - PROXY_PORT=8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/rmqcerts:/opt/rmqcerts
+    depends_on:
+      - goaws
+      - mypostgres
+
+
+  case-config:
+    build:
+      context: case-config
+    environment:
+      - spring_datasource_url=jdbc:postgresql://mypostgres:5432/postgres
+      - spring_datatsource_username=admin
+      - spring_datasource_password=password
+      - ce_api_gateway_url=http://haproxy:3456
+      - PROXY_HOST=sjc1intproxy01.crd.ge.com
+      - PROXY_PORT=8080
+    ports:
+      - "8085:8080"
+    depends_on:
+      - mypostgres
+      - case
+
+  case-patient:
+    build:
+      context: case-patient
+    environment:
+      - spring_datasource_url=jdbc:postgresql://mypostgres:5432/postgres
+      - spring_datatsource_username=admin
+      - spring_datasource_password=password
+      - ce_api_gateway_url=http://haproxy:3456
+      - PROXY_HOST=sjc1intproxy01.crd.ge.com
+      - PROXY_PORT=8080
+    ports:
+      - "8090:8080"
+    depends_on:
+      - mypostgres
+      - case
+
+  case-proc:
+    build:
+      context: case-proc
+    environment:
+      - spring_datasource_url=jdbc:postgresql://mypostgres:5432/postgres
+      - spring_datatsource_username=admin
+      - spring_datasource_password=password
+      - PROXY_HOST=sjc1intproxy01.crd.ge.com
+      - PROXY_PORT=8080
+      - sqsaws=http://goaws:52113
+      - ce_api_gateway_url=http://haproxy:3456
+    depends_on:
+      - mypostgres
+      - goaws
+      - case
+
+  haproxy:
+    container_name: haproxy
+    build:
+      context: haproxy
+    environment:
+      - case_url=case:8080
+      # - case_patient_url=case-patient:8080
+      # - case_config_url=case-config:8080
+    ports:
+      - "3456:3456"
+    depends_on:
+      - case
+      # - case-config
